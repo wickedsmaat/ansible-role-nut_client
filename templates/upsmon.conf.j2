@@ -1,0 +1,24 @@
+#jinja2: lstrip_blocks: True
+# Network UPS Tools - upsmon.conf (client)
+
+MINSUPPLIES 1
+POLLFREQ 5
+POLLFREQALERT 5
+DEADTIME 15
+HOSTSYNC 15
+SHUTDOWNCMD "systemctl poweroff"
+
+NOTIFYFLAG ONLINE SYSLOG
+NOTIFYFLAG ONBATT SYSLOG
+NOTIFYFLAG LOWBATT SYSLOG
+NOTIFYFLAG FSD SYSLOG
+NOTIFYFLAG COMMOK SYSLOG
+NOTIFYFLAG COMMBAD SYSLOG
+NOTIFYFLAG SHUTDOWN SYSLOG
+NOTIFYFLAG REPLBATT SYSLOG
+NOTIFYFLAG NOCOMM SYSLOG
+NOTIFYFLAG NOPARENT SYSLOG
+
+# Use the UPS defined on the server
+# MONITOR <upsname[@host]> <power value> <username> <password> <mode>
+MONITOR {{ ups_name }}@{{ nut_server_ip }} {{ nut_power_value }} {{ ups_user }} {{ ups_user_password }} {{ nut_role }}

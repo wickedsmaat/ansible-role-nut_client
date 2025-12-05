@@ -1,0 +1,60 @@
+---
+- name: Set Variables we need for later
+  ansible.builtin.set_fact:
+    nut_server_ip: "10.0.0.17"
+    ups_name: "apcups" 
+    ups_driver: "usbhid-ups"
+    ups_description: "APC Smart-UPS 3000 SMTL3000RMUCNC"
+    ups_user: "upsmon"
+    ups_user_password: "Pow3rfulSluggg"
+    nut_power_value: "1"
+    nut_role: "slave"
+
+- name: Install NUT client package
+  ansible.builtin.dnf:
+    name: nut-client
+    state: present
+  register: nut_client
+  when: not ansible_hostname == "nut"
+
+- name: Ensure /etc/ups exists
+  ansible.builtin.file:
+    path: /etc/ups
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  when: not ansible_hostname == "nut"
+
+- name: Write upsmon.conf
+  ansible.builtin.template:
+    src: /home/ansible/templates/nut/client/upsmon.conf.j2
+    dest: /etc/ups/upsmon.conf
+    owner: root
+    group: root
+    mode: '0640'
+  when: not ansible_hostname == "nut"
+
+- name: Configure the Network Server in NUT
+  ansible.builtin.lineinfile:
+    path: /etc/ups/nut.conf
+    regexp: '^MODE=none'
+    line: 'MODE=netclient'
+  tags: ups_conf
+  when: not ansible_hostname == "nut"
+
+- name: Enable and start NUT monitor service (primary name)
+  ansible.builtin.systemd_service:
+    name: nut-monitor.service
+    state: started
+    enabled: true
+  when: not ansible_hostname == "nut"
+
+- name: Restart_NUT
+  ansible.builtin.systemd_service:
+    name: nut-monitor.service
+    state: restarted
+    enabled: true
+  tags: ups_restart
+  when: not ansible_hostname == "nut"
+...
