@@ -1,17 +1,17 @@
 ---
 galaxy_info:
   author: thisguyshouldworkforus
-  description: Ansible Roles for stuff and junk
+  description: Ansible role to install and configure NUT (Network UPS Tools) client for power management and UPS monitoring.
   company: "Hire This Guy, LLC."
   license: MIT
   min_ansible_version: 2.1
   galaxy_tags:
-    - 1.0.0
     - networking
-    - nut-client
+    - nut
+    - client
     - ntp
-    - power-management
+    - power
+    - management
     - ups
-    - network-ups-tools
 dependencies: []
 ...

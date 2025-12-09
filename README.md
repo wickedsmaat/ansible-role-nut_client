@@ -1,48 +1,89 @@
 # ansible-role-nut_client
-Overview
 
-This role configures a system as a NUT UPS client, allowing it to receive power-event notifications from a central NUT server.
-A NUT client does not talk to UPS hardware directly; instead, it follows shutdown instructions from the master server.
-This ensures clean, coordinated shutdown of homelab machines during power failures.
+## Overview
 
-## Task-by-Task Breakdown
-Installing the NUT Client Package
+This role configures a system as a **NUT UPS network client**, allowing it to receive power-event notifications and shutdown instructions from a central NUT master server.
+A NUT client does **not** communicate with UPS hardware directly. Instead, it listens to the master server for status updates and executes coordinated shutdown actions when power events occur.
+This ensures clean, predictable shutdown behavior across all homelab or distributed systems relying on the same UPS.
 
-This task installs the nut-client package, which provides the upsmon daemon.
-upsmon is responsible for maintaining a network connection to the UPS server and responding to UPS state changes.
-This is the minimal software required for a NUT slave node.
+---
 
-Setting Client Configuration Variables
+## Required Variables
 
-This task defines runtime variables such as UPS name, server address, credentials, and role designation.
-These values feed into configuration templates used later.
-By isolating them in one place, the role keeps templates portable and easy to update.
+This role **cannot run** unless the following variables are defined.
+They represent the client’s NUT identity, server connection details, authentication credentials, and operating role.
 
-Creating the NUT Configuration Directory
+| Variable                    | Description                                                |
+| --------------------------- | ---------------------------------------------------------- |
+| `ansible_nut_server_ip`     | IP address of the NUT master server                        |
+| `ansible_ups_name`          | Name of the UPS as defined on the server                   |
+| `ansible_ups_driver`        | Driver type used by the UPS (matches server configuration) |
+| `ansible_ups_description`   | Human-readable description of the UPS                      |
+| `ansible_ups_user`          | Username for NUT client authentication                     |
+| `ansible_ups_user_password` | Password for the NUT user                                  |
+| `ansible_nut_power_value`   | Shutdown power threshold used by upsmon                    |
+| `ansible_nut_role`          | Client role (typically `slave` or `netclient`)             |
 
-This ensures /etc/ups exists with proper permissions.
-Most NUT configuration files reside here, and missing this directory would prevent templates from rendering correctly.
-This step guarantees a predictable filesystem layout for the rest of the role.
+These must be set either:
 
-Deploying the upsmon Client Configuration
+* in the calling playbook
+* in `group_vars` / `host_vars`
+* or passed inline when including the role
 
-This task writes /etc/ups/upsmon.conf based on the previously defined variables.
-The configuration instructs the system how to authenticate to the UPS server and what shutdown behavior to follow.
-This is the core of NUT client behavior, enabling remote monitoring.
+Example:
 
-Configuring NUT Mode as “netclient”
+```yaml
+- name: Configure NUT clients
+  hosts: lab_nodes
+  vars:
+    ansible_nut_server_ip: "192.168.50.10"
+    ansible_ups_name: "ups01"
+    ansible_ups_driver: "usbhid-ups"
+    ansible_ups_description: "Primary Homelab UPS"
+    ansible_ups_user: "upsmon"
+    ansible_ups_user_password: "changeme"
+    ansible_nut_power_value: 5
+    ansible_nut_role: "netclient"
 
-This updates /etc/ups/nut.conf so the local system runs in netclient mode.
-In this mode, the system does not access UPS hardware — it only listens to a remote NUT master.
-This prevents conflicts and ensures the machine behaves purely as a slave.
+  roles:
+    - ansible-role-nut_client
+```
 
-Enabling and Starting the NUT Monitor Service
+---
 
-This activates the nut-monitor systemd unit so that upsmon starts at boot.
-When enabled, the machine will continuously monitor UPS conditions from the remote server.
-This ensures timely and controlled shutdowns during power events.
+## Task Breakdown
+
+### Installing the NUT Client Package
+
+Installs `nut-client`, which provides the `upsmon` daemon responsible for maintaining the network link to the NUT master server and responding to UPS state transitions.
+
+### Setting Client Configuration Variables
+
+Captures all required UPS and server-specific values and prepares them for use within templates.
+This ensures templates stay portable and reusable.
+
+### Creating the NUT Configuration Directory
+
+Ensures `/etc/ups` exists with correct ownership and permissions, providing a predictable location for all NUT configuration files.
+
+### Deploying the `upsmon.conf` Configuration
+
+Generates `/etc/ups/upsmon.conf` using the defined variables.
+This defines authentication details, monitoring behavior, and shutdown actions.
+
+### Configuring NUT Mode as `netclient`
+
+Updates `/etc/ups/nut.conf` to place the machine in **network client mode** so it does **not** attempt direct hardware communication—only remote monitoring.
+
+### Enabling and Starting the NUT Monitor Service
+
+Ensures `nut-monitor` is enabled and running so the system continuously listens for UPS state changes and reacts appropriately.
+
+---
 
 ## Summary
 
-The NUT client role transforms any system into a safely managed UPS-aware node.
-It installs the necessary software, configures the client-side monitoring services, and ensures the system participates correctly in a coordinated multi-machine UPS shutdown strategy.
+This role prepares any machine to act as a fully managed NUT network client.
+By installing the required software, generating all necessary configuration files, and enabling UPS monitoring services, the role ensures the system participates effectively in a coordinated multi-machine shutdown strategy.
+
+If you want, I can also generate a **schema**, **defaults file**, or **validation task** to ensure the required variables are present.
