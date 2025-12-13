@@ -1,5 +1,7 @@
 ---
 galaxy_info:
+  role_name: nut_client
+  namespace: thisguyshouldworkforus
   author: Alexander Snyder
   description: Ansible role to install and configure NUT (Network UPS Tools) client for power management and UPS monitoring.
   company: ThisGuyShouldWorkFor.Us
@@ -7,7 +9,6 @@ galaxy_info:
   min_ansible_version: "2.9"
   platforms:
     - name: EL # RedHat, and RHEL Clones
-
   galaxy_tags:
     - networking
     - nut
@@ -18,5 +19,5 @@ galaxy_info:
     - ups
 
 collections: []
+
 dependencies: []
-...

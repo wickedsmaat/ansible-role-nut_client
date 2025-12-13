@@ -70,4 +70,3 @@
     state: restarted
     enabled: true
   tags: ups_restart
-...
