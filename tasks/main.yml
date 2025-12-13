@@ -41,7 +41,7 @@
     state: directory
     owner: root
     group: root
-    mode: '0755'
+    mode: "0755"
 
 - name: Write upsmon.conf
   ansible.builtin.template:
@@ -49,13 +49,13 @@
     dest: /etc/ups/upsmon.conf
     owner: root
     group: root
-    mode: '0640'
+    mode: "0640"
 
 - name: Configure the Network Server in NUT
   ansible.builtin.lineinfile:
     path: /etc/ups/nut.conf
-    regexp: '^MODE=none'
-    line: 'MODE=netclient'
+    regexp: "^MODE=none"
+    line: "MODE=netclient"
   tags: ups_conf
 
 - name: Enable and start NUT monitor service (primary name)

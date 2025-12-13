@@ -1,24 +1,17 @@
 ---
 # "10.0.0.17"
 ansible_nut_server_ip:
-
 # "apcups"
 ansible_ups_name:
-
 # "usbhid-ups"
 ansible_ups_driver:
-
 # "APC Smart-UPS 3000 SMTL3000RMUCNC"
 ansible_ups_description:
-
 # "upsmon"
 ansible_ups_user:
-
 # "Pow3rfulSluggg"
 ansible_ups_user_password:
-
 # "1"
 ansible_nut_power_value:
-
 # "slave"
 ansible_nut_role:
